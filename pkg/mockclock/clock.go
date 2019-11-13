@@ -91,6 +91,20 @@ func (mr *MockClockMockRecorder) NowProto() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NowProto", reflect.TypeOf((*MockClock)(nil).NowProto))
 }
 
+// Since mocks base method
+func (m *MockClock) Since(arg0 time.Time) time.Duration {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Since", arg0)
+	ret0, _ := ret[0].(time.Duration)
+	return ret0
+}
+
+// Since indicates an expected call of Since
+func (mr *MockClockMockRecorder) Since(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Since", reflect.TypeOf((*MockClock)(nil).Since), arg0)
+}
+
 // MockTicker is a mock of Ticker interface
 type MockTicker struct {
 	ctrl     *gomock.Controller

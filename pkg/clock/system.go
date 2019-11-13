@@ -32,6 +32,10 @@ func (c systemClock) Now() time.Time {
 	return time.Now()
 }
 
+func (c systemClock) Since(t time.Time) time.Duration {
+	return time.Since(t)
+}
+
 type systemTicker struct {
 	time.Ticker
 }
