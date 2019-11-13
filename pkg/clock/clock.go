@@ -20,6 +20,9 @@ type Clock interface {
 
 	// NowProto returns a new Protobuf timestamp representing the current local time.
 	NowProto() *timestamp.Timestamp
+
+	// Since returns the time elapsed since t.
+	Since(t time.Time) time.Duration
 }
 
 // Ticker wraps the time.Ticker class.
