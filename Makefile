@@ -36,7 +36,14 @@ go-mod-tidy:
 # go-lint: lint Go files
 .PHONY: go-lint
 go-lint: $(GOLANGCI_LINT)
-	$(GOLANGCI_LINT) run --enable-all
+    # dupl: disabled due to similarities in tests
+	# interfacer: deprecated
+	# maligned: removed to not spend time on config aligment
+	# funlen: tests with many testcases become too long, but should not be split.
+	# unused: buggy with GolangCI-Lint 1.18.0
+	# godox: we keep todos in the history
+	# wsl: too strict
+	$(GOLANGCI_LINT) run --enable-all --skip-dirs build --disable dupl,interfacer,maligned,funlen,unused,godox,wsl
 
 # go-review: review Go files
 .PHONY: go-review
