@@ -9,8 +9,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/einride/clock-go/pkg/external/ticker"
 	"github.com/einride/clock-go/pkg/clock"
+	"github.com/einride/clock-go/pkg/external/ticker"
 	perceptionv1 "github.com/einride/proto/gen/go/perception/v1"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/timestamp"
@@ -134,6 +134,11 @@ func (g *Clock) NowProto() *timestamp.Timestamp {
 		g.Logger.Error("Convert time from external", zap.Error(err))
 	}
 	return t
+}
+
+func (g *Clock) Since(t time.Time) time.Duration {
+	now := g.getTime()
+	return now.Sub(t)
 }
 
 func makeUUID() string {
