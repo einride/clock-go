@@ -3,7 +3,6 @@ module github.com/einride/clock-go
 go 1.12
 
 require (
-	github.com/einride/proto v0.108.0
 	github.com/golang/mock v1.3.1
 	github.com/golang/protobuf v1.3.2
 	github.com/stretchr/testify v1.4.0

@@ -5,7 +5,6 @@ import (
 	"testing"
 	"time"
 
-	perceptionv1 "github.com/einride/proto/gen/go/perception/v1"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
@@ -37,10 +36,8 @@ func TestExternalClock_Stop(t *testing.T) {
 	// should not be able to tick
 	loopTicks := loopTicker.C()
 	nanoTime, _ := ptypes.TimestampProto(time.Unix(0, tickTime.Nanoseconds()+1))
-	externalClock.SetEgoState(
-		&perceptionv1.EgoState{
-			Time: nanoTime,
-		})
+	err := externalClock.SetTimestamp(nanoTime)
+	require.NoError(t, err)
 	didSet := false
 	select {
 	case <-time.After(1 * time.Millisecond):
@@ -73,10 +70,8 @@ func TestExternalClock_Tick(t *testing.T) {
 
 	// Send a tick
 	tickTimeProto, _ := ptypes.TimestampProto(time.Unix(0, tickTime.Nanoseconds()))
-	externalClock.SetEgoState(
-		&perceptionv1.EgoState{
-			Time: tickTimeProto,
-		})
+	err := externalClock.SetTimestamp(tickTimeProto)
+	require.NoError(t, err)
 
 	// exect didSet to be true
 	didSet := false
@@ -98,10 +93,8 @@ func TestExternalClock_After(t *testing.T) {
 
 	// Send a tick
 	tickTimeProto, _ := ptypes.TimestampProto(time.Unix(0, tickTime.Nanoseconds()+1))
-	externalClock.SetEgoState(
-		&perceptionv1.EgoState{
-			Time: tickTimeProto,
-		})
+	err := externalClock.SetTimestamp(tickTimeProto)
+	require.NoError(t, err)
 
 	// exect didSet to be true
 	didSet := false
@@ -123,10 +116,8 @@ func TestExternalClock_Removed(t *testing.T) {
 
 	// Send a tick
 	tickTimeProto, _ := ptypes.TimestampProto(time.Unix(0, tickTime.Nanoseconds()))
-	externalClock.SetEgoState(
-		&perceptionv1.EgoState{
-			Time: tickTimeProto,
-		})
+	err := externalClock.SetTimestamp(tickTimeProto)
+	require.NoError(t, err)
 
 	// exect didSet to be true
 	select {
@@ -146,10 +137,8 @@ func TestExternalClock_AfterFailToShortTime(t *testing.T) {
 
 	// Send a tick
 	tickTimeProto, _ := ptypes.TimestampProto(time.Unix(0, 0))
-	externalClock.SetEgoState(
-		&perceptionv1.EgoState{
-			Time: tickTimeProto,
-		})
+	err := externalClock.SetTimestamp(tickTimeProto)
+	require.NoError(t, err)
 
 	// exect didSet to be true
 	select {
@@ -169,10 +158,8 @@ func TestExternalClock_NewTicker_Tick_Periodically(t *testing.T) {
 	// Send a tick
 	for i := range make([]int64, 1000) {
 		tickTimeProto, _ := ptypes.TimestampProto(time.Unix(0, int64(i+1)*tickTime.Nanoseconds()+1))
-		externalClock.SetEgoState(
-			&perceptionv1.EgoState{
-				Time: tickTimeProto,
-			})
+		err := externalClock.SetTimestamp(tickTimeProto)
+		require.NoError(t, err)
 
 		// exect didSet to be true
 		didSet := false
@@ -200,10 +187,8 @@ func TestExternalClock_TestLooper(t *testing.T) {
 				cancel()
 			} else {
 				tickProto, _ := ptypes.TimestampProto(time.Unix(0, (tick+1)*time.Millisecond.Nanoseconds()))
-				externalClock.SetEgoState(
-					&perceptionv1.EgoState{
-						Time: tickProto,
-					})
+				err := externalClock.SetTimestamp(tickProto)
+				require.NoError(t, err)
 			}
 		},
 	}
@@ -213,11 +198,9 @@ func TestExternalClock_TestLooper(t *testing.T) {
 	})
 	<-looper.init
 	tickProto, _ := ptypes.TimestampProto(time.Unix(0, 1*time.Millisecond.Nanoseconds()))
-	externalClock.SetEgoState(
-		&perceptionv1.EgoState{
-			Time: tickProto,
-		})
-	err := g.Wait()
+	err := externalClock.SetTimestamp(tickProto)
+	require.NoError(t, err)
+	err = g.Wait()
 	require.NoError(t, err)
 	require.Equal(t, looper.Target, looper.counter)
 }
@@ -239,11 +222,9 @@ func TestExternalClock_TestLooper_AddTicker(t *testing.T) {
 	})
 	<-looper.init
 	tickProto, _ := ptypes.TimestampProto(time.Unix(0, 1*time.Millisecond.Nanoseconds()+1))
-	externalClock.SetEgoState(
-		&perceptionv1.EgoState{
-			Time: tickProto,
-		})
-	err := g.Wait()
+	err := externalClock.SetTimestamp(tickProto)
+	require.NoError(t, err)
+	err = g.Wait()
 	require.NoError(t, err)
 }
 
