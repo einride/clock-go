@@ -11,7 +11,6 @@ import (
 
 	"github.com/einride/clock-go/pkg/clock"
 	"github.com/einride/clock-go/pkg/external/ticker"
-	perceptionv1 "github.com/einride/proto/gen/go/perception/v1"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"go.uber.org/zap"
@@ -36,8 +35,13 @@ func NewClock(logger *zap.Logger) *Clock {
 	return c
 }
 
-func (g *Clock) SetEgoState(egoState *perceptionv1.EgoState) {
-	g.timestampChan <- time.Unix(egoState.Time.Seconds, int64(egoState.Time.Nanos)).UTC()
+func (g *Clock) SetTimestamp(t *timestamp.Timestamp) error {
+	ts, err := ptypes.Timestamp(t)
+	if err != nil {
+		return fmt.Errorf("SetTimestamp: %w", err)
+	}
+	g.timestampChan <- ts
+	return nil
 }
 
 func (g *Clock) Run(ctx context.Context) error {
