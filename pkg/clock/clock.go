@@ -4,7 +4,7 @@ package clock
 import (
 	"time"
 
-	"github.com/golang/protobuf/ptypes/timestamp"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // Clock provides capabilities from the time standard library package.
@@ -19,7 +19,7 @@ type Clock interface {
 	Now() time.Time
 
 	// NowProto returns a new Protobuf timestamp representing the current local time.
-	NowProto() *timestamp.Timestamp
+	NowProto() *timestamppb.Timestamp
 
 	// Since returns the time elapsed since t.
 	Since(t time.Time) time.Duration

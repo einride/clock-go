@@ -11,9 +11,8 @@ import (
 
 	"github.com/einride/clock-go/pkg/clock"
 	"github.com/einride/clock-go/pkg/external/ticker"
-	"github.com/golang/protobuf/ptypes"
-	"github.com/golang/protobuf/ptypes/timestamp"
 	"go.uber.org/zap"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type Clock struct {
@@ -35,12 +34,8 @@ func NewClock(logger *zap.Logger) *Clock {
 	return c
 }
 
-func (g *Clock) SetTimestamp(t *timestamp.Timestamp) error {
-	ts, err := ptypes.Timestamp(t)
-	if err != nil {
-		return fmt.Errorf("SetTimestamp: %w", err)
-	}
-	g.timestampChan <- ts
+func (g *Clock) SetTimestamp(t *timestamppb.Timestamp) error {
+	g.timestampChan <- t.AsTime()
 	return nil
 }
 
@@ -132,12 +127,8 @@ func (g *Clock) Now() time.Time {
 	return g.getTime()
 }
 
-func (g *Clock) NowProto() *timestamp.Timestamp {
-	t, err := ptypes.TimestampProto(g.getTime())
-	if err != nil {
-		g.Logger.Error("Convert time from external", zap.Error(err))
-	}
-	return t
+func (g *Clock) NowProto() *timestamppb.Timestamp {
+	return timestamppb.New(g.getTime())
 }
 
 func (g *Clock) Since(t time.Time) time.Duration {

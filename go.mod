@@ -1,11 +1,11 @@
 module github.com/einride/clock-go
 
-go 1.13
+go 1.14
 
 require (
-	github.com/golang/mock v1.3.1
-	github.com/golang/protobuf v1.3.2
-	go.uber.org/zap v1.13.0
-	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
+	github.com/golang/mock v1.4.3
+	go.uber.org/zap v1.15.0
+	golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208
+	google.golang.org/protobuf v1.25.0
 	gotest.tools/v3 v3.0.2
 )

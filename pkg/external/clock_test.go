@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/protobuf/ptypes"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"gotest.tools/v3/assert"
 	is "gotest.tools/v3/assert/cmp"
 )
@@ -36,7 +36,7 @@ func TestExternalClock_Stop(t *testing.T) {
 
 	// should not be able to tick
 	loopTicks := loopTicker.C()
-	nanoTime, _ := ptypes.TimestampProto(time.Unix(0, tickTime.Nanoseconds()+1))
+	nanoTime := timestamppb.New(time.Unix(0, tickTime.Nanoseconds()+1))
 	err := externalClock.SetTimestamp(nanoTime)
 	assert.NilError(t, err)
 	didSet := false
@@ -70,7 +70,7 @@ func TestExternalClock_Tick(t *testing.T) {
 	loopTicks := loopTicker.C()
 
 	// Send a tick
-	tickTimeProto, _ := ptypes.TimestampProto(time.Unix(0, tickTime.Nanoseconds()))
+	tickTimeProto := timestamppb.New(time.Unix(0, tickTime.Nanoseconds()))
 	err := externalClock.SetTimestamp(tickTimeProto)
 	assert.NilError(t, err)
 
@@ -93,7 +93,7 @@ func TestExternalClock_After(t *testing.T) {
 	afterChan := externalClock.After(tickTime)
 
 	// Send a tick
-	tickTimeProto, _ := ptypes.TimestampProto(time.Unix(0, tickTime.Nanoseconds()+1))
+	tickTimeProto := timestamppb.New(time.Unix(0, tickTime.Nanoseconds()+1))
 	err := externalClock.SetTimestamp(tickTimeProto)
 	assert.NilError(t, err)
 
@@ -116,7 +116,7 @@ func TestExternalClock_Removed(t *testing.T) {
 	afterChan := externalClock.After(tickTime)
 
 	// Send a tick
-	tickTimeProto, _ := ptypes.TimestampProto(time.Unix(0, tickTime.Nanoseconds()))
+	tickTimeProto := timestamppb.New(time.Unix(0, tickTime.Nanoseconds()))
 	err := externalClock.SetTimestamp(tickTimeProto)
 	assert.NilError(t, err)
 
@@ -137,7 +137,7 @@ func TestExternalClock_AfterFailToShortTime(t *testing.T) {
 	afterChan := externalClock.After(tickTime)
 
 	// Send a tick
-	tickTimeProto, _ := ptypes.TimestampProto(time.Unix(0, 0))
+	tickTimeProto := timestamppb.New(time.Unix(0, 0))
 	err := externalClock.SetTimestamp(tickTimeProto)
 	assert.NilError(t, err)
 
@@ -158,7 +158,7 @@ func TestExternalClock_NewTicker_Tick_Periodically(t *testing.T) {
 
 	// Send a tick
 	for i := range make([]int64, 1000) {
-		tickTimeProto, _ := ptypes.TimestampProto(time.Unix(0, int64(i+1)*tickTime.Nanoseconds()+1))
+		tickTimeProto := timestamppb.New(time.Unix(0, int64(i+1)*tickTime.Nanoseconds()+1))
 		err := externalClock.SetTimestamp(tickTimeProto)
 		assert.NilError(t, err)
 
@@ -187,7 +187,7 @@ func TestExternalClock_TestLooper(t *testing.T) {
 			if tick == target {
 				cancel()
 			} else {
-				tickProto, _ := ptypes.TimestampProto(time.Unix(0, (tick+1)*time.Millisecond.Nanoseconds()))
+				tickProto := timestamppb.New(time.Unix(0, (tick+1)*time.Millisecond.Nanoseconds()))
 				err := externalClock.SetTimestamp(tickProto)
 				assert.NilError(t, err)
 			}
@@ -198,7 +198,7 @@ func TestExternalClock_TestLooper(t *testing.T) {
 		return looper.Run(ctx)
 	})
 	<-looper.init
-	tickProto, _ := ptypes.TimestampProto(time.Unix(0, 1*time.Millisecond.Nanoseconds()))
+	tickProto := timestamppb.New(time.Unix(0, 1*time.Millisecond.Nanoseconds()))
 	err := externalClock.SetTimestamp(tickProto)
 	assert.NilError(t, err)
 	err = g.Wait()
@@ -222,7 +222,7 @@ func TestExternalClock_TestLooper_AddTicker(t *testing.T) {
 		return looper.Run(ctx)
 	})
 	<-looper.init
-	tickProto, _ := ptypes.TimestampProto(time.Unix(0, 1*time.Millisecond.Nanoseconds()+1))
+	tickProto := timestamppb.New(time.Unix(0, 1*time.Millisecond.Nanoseconds()+1))
 	err := externalClock.SetTimestamp(tickProto)
 	assert.NilError(t, err)
 	err = g.Wait()
