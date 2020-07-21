@@ -3,8 +3,7 @@ package clock
 import (
 	"time"
 
-	"github.com/golang/protobuf/ptypes"
-	"github.com/golang/protobuf/ptypes/timestamp"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // System returns a Clock implementation that delegate to the time package.
@@ -20,8 +19,8 @@ func (c systemClock) After(d time.Duration) <-chan time.Time {
 	return time.After(d)
 }
 
-func (c systemClock) NowProto() *timestamp.Timestamp {
-	return ptypes.TimestampNow()
+func (c systemClock) NowProto() *timestamppb.Timestamp {
+	return timestamppb.Now()
 }
 
 func (c systemClock) NewTicker(d time.Duration) Ticker {

@@ -7,7 +7,7 @@ package mockclock
 import (
 	clock "github.com/einride/clock-go/pkg/clock"
 	gomock "github.com/golang/mock/gomock"
-	timestamp "github.com/golang/protobuf/ptypes/timestamp"
+	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	time "time"
 )
@@ -78,10 +78,10 @@ func (mr *MockClockMockRecorder) Now() *gomock.Call {
 }
 
 // NowProto mocks base method
-func (m *MockClock) NowProto() *timestamp.Timestamp {
+func (m *MockClock) NowProto() *timestamppb.Timestamp {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "NowProto")
-	ret0, _ := ret[0].(*timestamp.Timestamp)
+	ret0, _ := ret[0].(*timestamppb.Timestamp)
 	return ret0
 }
 
