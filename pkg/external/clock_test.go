@@ -7,7 +7,6 @@ import (
 
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
-	"google.golang.org/protobuf/types/known/timestamppb"
 	"gotest.tools/v3/assert"
 	is "gotest.tools/v3/assert/cmp"
 )
@@ -36,9 +35,7 @@ func TestExternalClock_Stop(t *testing.T) {
 
 	// should not be able to tick
 	loopTicks := loopTicker.C()
-	nanoTime := timestamppb.New(time.Unix(0, tickTime.Nanoseconds()+1))
-	err := externalClock.SetTimestamp(nanoTime)
-	assert.NilError(t, err)
+	externalClock.SetTimestamp(time.Unix(0, tickTime.Nanoseconds()+1))
 	didSet := false
 	select {
 	case <-time.After(1 * time.Millisecond):
@@ -70,9 +67,7 @@ func TestExternalClock_Tick(t *testing.T) {
 	loopTicks := loopTicker.C()
 
 	// Send a tick
-	tickTimeProto := timestamppb.New(time.Unix(0, tickTime.Nanoseconds()))
-	err := externalClock.SetTimestamp(tickTimeProto)
-	assert.NilError(t, err)
+	externalClock.SetTimestamp(time.Unix(0, tickTime.Nanoseconds()))
 
 	// exect didSet to be true
 	didSet := false
@@ -93,9 +88,7 @@ func TestExternalClock_After(t *testing.T) {
 	afterChan := externalClock.After(tickTime)
 
 	// Send a tick
-	tickTimeProto := timestamppb.New(time.Unix(0, tickTime.Nanoseconds()+1))
-	err := externalClock.SetTimestamp(tickTimeProto)
-	assert.NilError(t, err)
+	externalClock.SetTimestamp(time.Unix(0, tickTime.Nanoseconds()+1))
 
 	// exect didSet to be true
 	didSet := false
@@ -116,9 +109,7 @@ func TestExternalClock_Removed(t *testing.T) {
 	afterChan := externalClock.After(tickTime)
 
 	// Send a tick
-	tickTimeProto := timestamppb.New(time.Unix(0, tickTime.Nanoseconds()))
-	err := externalClock.SetTimestamp(tickTimeProto)
-	assert.NilError(t, err)
+	externalClock.SetTimestamp(time.Unix(0, tickTime.Nanoseconds()))
 
 	// exect didSet to be true
 	select {
@@ -137,9 +128,7 @@ func TestExternalClock_AfterFailToShortTime(t *testing.T) {
 	afterChan := externalClock.After(tickTime)
 
 	// Send a tick
-	tickTimeProto := timestamppb.New(time.Unix(0, 0))
-	err := externalClock.SetTimestamp(tickTimeProto)
-	assert.NilError(t, err)
+	externalClock.SetTimestamp(time.Unix(0, 0))
 
 	// exect didSet to be true
 	select {
@@ -158,9 +147,7 @@ func TestExternalClock_NewTicker_Tick_Periodically(t *testing.T) {
 
 	// Send a tick
 	for i := range make([]int64, 1000) {
-		tickTimeProto := timestamppb.New(time.Unix(0, int64(i+1)*tickTime.Nanoseconds()+1))
-		err := externalClock.SetTimestamp(tickTimeProto)
-		assert.NilError(t, err)
+		externalClock.SetTimestamp(time.Unix(0, int64(i+1)*tickTime.Nanoseconds()+1))
 
 		// exect didSet to be true
 		didSet := false
@@ -187,9 +174,7 @@ func TestExternalClock_TestLooper(t *testing.T) {
 			if tick == target {
 				cancel()
 			} else {
-				tickProto := timestamppb.New(time.Unix(0, (tick+1)*time.Millisecond.Nanoseconds()))
-				err := externalClock.SetTimestamp(tickProto)
-				assert.NilError(t, err)
+				externalClock.SetTimestamp(time.Unix(0, (tick+1)*time.Millisecond.Nanoseconds()))
 			}
 		},
 	}
@@ -198,11 +183,8 @@ func TestExternalClock_TestLooper(t *testing.T) {
 		return looper.Run(ctx)
 	})
 	<-looper.init
-	tickProto := timestamppb.New(time.Unix(0, 1*time.Millisecond.Nanoseconds()))
-	err := externalClock.SetTimestamp(tickProto)
-	assert.NilError(t, err)
-	err = g.Wait()
-	assert.NilError(t, err)
+	externalClock.SetTimestamp(time.Unix(0, 1*time.Millisecond.Nanoseconds()))
+	assert.NilError(t, g.Wait())
 	assert.Equal(t, looper.Target, looper.counter)
 }
 
@@ -222,11 +204,8 @@ func TestExternalClock_TestLooper_AddTicker(t *testing.T) {
 		return looper.Run(ctx)
 	})
 	<-looper.init
-	tickProto := timestamppb.New(time.Unix(0, 1*time.Millisecond.Nanoseconds()+1))
-	err := externalClock.SetTimestamp(tickProto)
-	assert.NilError(t, err)
-	err = g.Wait()
-	assert.NilError(t, err)
+	externalClock.SetTimestamp(time.Unix(0, 1*time.Millisecond.Nanoseconds()+1))
+	assert.NilError(t, g.Wait())
 }
 
 type testLooper struct {

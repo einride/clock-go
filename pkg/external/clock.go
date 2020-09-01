@@ -34,9 +34,8 @@ func NewClock(logger *zap.Logger) *Clock {
 	return c
 }
 
-func (g *Clock) SetTimestamp(t *timestamppb.Timestamp) error {
-	g.timestampChan <- t.AsTime()
-	return nil
+func (g *Clock) SetTimestamp(t time.Time) {
+	g.timestampChan <- t
 }
 
 func (g *Clock) Run(ctx context.Context) error {
