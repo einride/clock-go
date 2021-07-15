@@ -105,6 +105,18 @@ func (mr *MockClockMockRecorder) Since(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Since", reflect.TypeOf((*MockClock)(nil).Since), arg0)
 }
 
+// Sleep mocks base method
+func (m *MockClock) Sleep(arg0 time.Duration) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "Sleep", arg0)
+}
+
+// Sleep indicates an expected call of Sleep
+func (mr *MockClockMockRecorder) Sleep(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Sleep", reflect.TypeOf((*MockClock)(nil).Sleep), arg0)
+}
+
 // MockTicker is a mock of Ticker interface
 type MockTicker struct {
 	ctrl     *gomock.Controller

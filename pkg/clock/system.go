@@ -35,6 +35,10 @@ func (c systemClock) Since(t time.Time) time.Duration {
 	return time.Since(t)
 }
 
+func (c systemClock) Sleep(d time.Duration) {
+	time.Sleep(d)
+}
+
 type systemTicker struct {
 	time.Ticker
 }

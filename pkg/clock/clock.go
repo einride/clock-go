@@ -23,6 +23,10 @@ type Clock interface {
 
 	// Since returns the time elapsed since t.
 	Since(t time.Time) time.Duration
+
+	// Sleep pauses the current goroutine for at least the duration d.
+	// A negative or zero duration causes Sleep to return immediately.
+	Sleep(d time.Duration)
 }
 
 // Ticker wraps the time.Ticker class.

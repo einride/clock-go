@@ -135,6 +135,10 @@ func (g *Clock) Since(t time.Time) time.Duration {
 	return now.Sub(t)
 }
 
+func (g *Clock) Sleep(d time.Duration) {
+	<-g.After(d)
+}
+
 func makeUUID() string {
 	b := make([]byte, 16)
 	_, err := rand.Read(b)
