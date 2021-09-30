@@ -1,4 +1,4 @@
-gcp_project := einride
+gcp_project := einride-build
 github_org := einride
 repo_name := $(shell basename -s .git $(shell git config --get remote.origin.url))
 git_root := $(shell git rev-parse --show-toplevel)
