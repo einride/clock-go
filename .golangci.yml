@@ -17,3 +17,9 @@ linters:
     - goerr113 # allow "dynamic" errors
     - exhaustive # TODO: fix and enable
     - gofumpt # TODO: enable when whitespace diff issue is resolved
+    - maligned # deprecated
+    - scopelint # deprecated
+    - golint # deprecated
+    - paralleltest # don't require that test methods can be run in parallel
+    - nlreturn # don't require newline before return
+    - exhaustivestruct # allow zero initialization

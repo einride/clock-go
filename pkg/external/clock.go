@@ -141,8 +141,7 @@ func (g *Clock) Sleep(d time.Duration) {
 
 func makeUUID() string {
 	b := make([]byte, 16)
-	_, err := rand.Read(b)
-	if err != nil {
+	if _, err := rand.Read(b); err != nil {
 		log.Fatal(err)
 	}
 	uuid := fmt.Sprintf("%x-%x-%x-%x-%x",
