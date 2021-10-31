@@ -3,6 +3,8 @@ all: \
 	yaml-format \
 	markdown-format \
 	mockgen-generate \
+	go-mod-tidy \
+	go-test \
 	go-lint \
 	go-review \
 	go-mod-tidy \
@@ -12,6 +14,14 @@ include tools/git-verify-nodiff/rules.mk
 include tools/golangci-lint/rules.mk
 include tools/prettier/rules.mk
 include tools/goreview/rules.mk
+
+.PHONY: go-test
+go-test:
+	go test -v ./...
+
+.PHONY: go-mod-tidy
+go-mod-tidy:
+	go mod tidy
 
 # go-mod-tidy: update Go module files
 .PHONY: go-mod-tidy
