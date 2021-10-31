@@ -170,6 +170,23 @@ func TestExternalClock_AfterFailToShortTime(t *testing.T) {
 	}
 }
 
+func TestExternalClock_NewTimer(t *testing.T) {
+	externalClock := newTestFixture(t)
+
+	// given duration for timer
+	timerTime := 1 * time.Millisecond
+	timer := externalClock.NewTimer(timerTime)
+	timerSignal := timer.C()
+
+	externalClock.SetTimestamp(time.Unix(0, int64(1)*timerTime.Nanoseconds()+1))
+
+	select {
+	case <-time.After(1 * time.Second):
+		t.FailNow()
+	case <-timerSignal:
+	}
+}
+
 func TestExternalClock_NewTicker_Tick_Periodically(t *testing.T) {
 	externalClock := newTestFixture(t)
 	// Given a ticker with a tick time
