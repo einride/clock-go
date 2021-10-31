@@ -9,8 +9,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/einride/clock-go/pkg/clock"
-	"github.com/einride/clock-go/pkg/external/ticker"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -21,14 +19,14 @@ type Clock struct {
 	timeMutex     sync.Mutex
 	currentTime   time.Time
 	tickerMutex   sync.RWMutex
-	tickers       map[string]*ticker.Ticker
+	tickers       map[string]*ticker
 }
 
 func NewClock(logger *zap.Logger) *Clock {
 	c := &Clock{
 		Logger:        logger,
 		timestampChan: make(chan time.Time),
-		tickers:       map[string]*ticker.Ticker{},
+		tickers:       map[string]*ticker{},
 	}
 	c.currentTime = time.Unix(0, 0)
 	return c
@@ -53,15 +51,15 @@ func (g *Clock) Run(ctx context.Context) error {
 					continue
 				}
 				tickerInstance.SetLastTimestamp(recvTime)
-				if !tickerInstance.IsPeriodic {
+				if !tickerInstance.isPeriodic {
 					g.tickerMutex.RUnlock()
 					tickerInstance.Stop()
 					g.tickerMutex.RLock()
 				}
 				select {
-				case tickerInstance.TimeChan <- recvTime:
+				case tickerInstance.timeChan <- recvTime:
 				case <-time.After(20 * time.Millisecond):
-					g.Logger.Warn("ticker dropped message", zap.String("called from", tickerInstance.Caller))
+					g.Logger.Warn("ticker dropped message", zap.String("called from", tickerInstance.caller))
 				}
 			}
 			g.setTime(recvTime)
@@ -90,37 +88,6 @@ func (g *Clock) After(duration time.Duration) <-chan time.Time {
 	}
 	tickerInstance := g.newTickerInternal(calledFrom, duration, false)
 	return tickerInstance.C()
-}
-
-func (g *Clock) NewTicker(d time.Duration) clock.Ticker {
-	_, file, no, ok := runtime.Caller(1)
-	var calledFrom string
-	if ok {
-		calledFrom = fmt.Sprintf("called from %s#%d\n", file, no)
-	}
-	g.Logger.Info("added new ticker", zap.String("called from", calledFrom))
-	return g.newTickerInternal(calledFrom, d, true)
-}
-
-func (g *Clock) newTickerInternal(caller string, d time.Duration, periodic bool) clock.Ticker {
-	c := make(chan time.Time)
-	uuid := makeUUID()
-	intervalTicker := &ticker.Ticker{
-		Caller:   caller,
-		TimeChan: c,
-		Duration: d,
-		StopFunc: func() {
-			g.tickerMutex.Lock()
-			delete(g.tickers, uuid)
-			g.tickerMutex.Unlock()
-		},
-		IsPeriodic: periodic,
-	}
-	intervalTicker.SetLastTimestamp(g.getTime())
-	g.tickerMutex.Lock()
-	g.tickers[uuid] = intervalTicker
-	g.tickerMutex.Unlock()
-	return intervalTicker
 }
 
 func (g *Clock) Now() time.Time {
