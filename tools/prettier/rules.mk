@@ -8,11 +8,10 @@ $(PRETTIER):
 	@chmod +x $@
 	@touch $@
 
-# markdown-lint: lint Markdown documentation
-.PHONY: markdown-lint
-markdown-lint: $(PRETTIER)
-	$(info [$@] linting markdown files...)
-	@$(PRETTIER) --parser markdown --check *.md --loglevel warn
+.PHONY: markdown-format
+markdown-format: $(PRETTIER)
+	$(info [$@] formatting markdown files...)
+	@$(PRETTIER) --parser markdown --check *.md --loglevel warn -w
 
 .PHONY: yaml-format
 yaml-format: $(PRETTIER)

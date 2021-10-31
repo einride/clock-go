@@ -1,6 +1,7 @@
 # all: run a complete build
 all: \
-	markdown-lint \
+	yaml-format \
+	markdown-format \
 	mockgen-generate \
 	go-lint \
 	go-review \
