@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/einride/clock-go/pkg/clock"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -22,18 +23,22 @@ type Clock struct {
 	tickers       map[string]*ticker
 }
 
-func NewClock(logger *zap.Logger) *Clock {
+func NewClock(logger *zap.Logger, initialTime time.Time) *Clock {
 	c := &Clock{
 		Logger:        logger,
 		timestampChan: make(chan time.Time),
 		tickers:       map[string]*ticker{},
 	}
-	c.currentTime = time.Unix(0, 0)
+	c.currentTime = initialTime
 	return c
 }
 
 func (g *Clock) SetTimestamp(t time.Time) {
 	g.timestampChan <- t
+}
+
+func (g *Clock) NumberOfTriggers() int {
+	return len(g.tickers)
 }
 
 func (g *Clock) Run(ctx context.Context) error {
@@ -85,8 +90,19 @@ func (g *Clock) After(duration time.Duration) <-chan time.Time {
 	if ok {
 		calledFrom = fmt.Sprintf("called from %s#%d\n", file, no)
 	}
-	tickerInstance := g.newTickerInternal(calledFrom, duration, false)
+	tickerInstance := g.newTickerInternal(calledFrom, nil, duration, false)
 	return tickerInstance.C()
+}
+
+func (g *Clock) AfterFunc(d time.Duration, f func()) clock.Timer {
+	_, file, no, ok := runtime.Caller(1)
+	var calledFrom string
+	if ok {
+		calledFrom = fmt.Sprintf("called from %s#%d\n", file, no)
+	}
+	return &Timer{
+		Ticker: g.newTickerInternal(calledFrom, f, d, false),
+	}
 }
 
 func (g *Clock) Now() time.Time {
