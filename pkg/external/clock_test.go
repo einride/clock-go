@@ -1,14 +1,15 @@
-package external
+package external_test
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
+	"github.com/einride/clock-go/pkg/external"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 	"gotest.tools/v3/assert"
-	is "gotest.tools/v3/assert/cmp"
 )
 
 func TestExternalClock_NewTicker(t *testing.T) {
@@ -21,7 +22,7 @@ func TestExternalClock_NewTicker(t *testing.T) {
 	defer loopTicker.Stop()
 
 	// should find a new one.
-	assert.Assert(t, is.Len(externalClock.tickers, 1))
+	assert.Equal(t, externalClock.NumberOfTriggers(), 1)
 }
 
 func TestExternalClock_Now(t *testing.T) {
@@ -88,7 +89,7 @@ func TestExternalClock_RemoveTicker(t *testing.T) {
 	loopTicker.Stop()
 
 	// should be empty
-	assert.Assert(t, is.Len(externalClock.tickers, 0), "should be empty %+v", externalClock.tickers)
+	assert.Equal(t, externalClock.NumberOfTriggers(), 0, "should be empty %+v", externalClock.NumberOfTriggers())
 }
 
 func TestExternalClock_Tick(t *testing.T) {
@@ -133,6 +134,26 @@ func TestExternalClock_After(t *testing.T) {
 	assert.Assert(t, didSet)
 }
 
+func TestExternalClock_AfterFunc(t *testing.T) {
+	externalClock := newTestFixture(t)
+
+	// Given an external clock and a trigger time
+	triggerTime := 1 * time.Millisecond
+
+	// then trigger func after trigger time
+	didSet := false
+	afterTimer := externalClock.AfterFunc(triggerTime, func() {
+		didSet = true
+	})
+	externalClock.SetTimestamp(time.Unix(0, triggerTime.Nanoseconds()+1))
+	select {
+	case <-time.After(2 * time.Millisecond):
+		t.FailNow()
+	case <-afterTimer.C():
+	}
+	assert.Assert(t, didSet)
+}
+
 func TestExternalClock_Removed(t *testing.T) {
 	externalClock := newTestFixture(t)
 
@@ -148,7 +169,7 @@ func TestExternalClock_Removed(t *testing.T) {
 	case <-time.After(2 * time.Millisecond):
 		t.FailNow()
 	case <-afterChan:
-		assert.Assert(t, is.Len(externalClock.tickers, 0))
+		assert.Equal(t, externalClock.NumberOfTriggers(), 0)
 	}
 }
 
@@ -173,7 +194,7 @@ func TestExternalClock_AfterFailToShortTime(t *testing.T) {
 func TestExternalClock_NewTimer(t *testing.T) {
 	externalClock := newTestFixture(t)
 
-	// given duration for timer
+	// given duration for Timer
 	timerTime := 1 * time.Millisecond
 	timer := externalClock.NewTimer(timerTime)
 	timerSignal := timer.C()
@@ -259,7 +280,7 @@ func TestExternalClock_TestLooper_AddTicker(t *testing.T) {
 
 type testLooper struct {
 	init         chan struct{}
-	Clock        *Clock
+	Clock        *external.Clock
 	LoopInterval time.Duration
 	Target       int64
 	counter      int64
@@ -283,12 +304,15 @@ func (t *testLooper) Run(ctx context.Context) error {
 	}
 }
 
-func newTestFixture(t *testing.T) *Clock {
+func newTestFixture(t *testing.T) *external.Clock {
 	t.Helper()
-	c := NewClock(zap.NewExample())
+	c := external.NewClock(zap.NewExample(), time.Unix(0, 0))
 	var g errgroup.Group
 	g.Go(func() error {
-		return c.Run(context.Background())
+		if err := c.Run(context.Background()); err != nil {
+			return fmt.Errorf("new fixture: %w", err)
+		}
+		return nil
 	})
 	return c
 }

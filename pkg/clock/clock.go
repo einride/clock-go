@@ -2,6 +2,7 @@
 package clock
 
 import (
+	"context"
 	"time"
 
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -11,6 +12,9 @@ import (
 type Clock interface {
 	// After waits for the duration to elapse and then sends the current time on the returned channel.
 	After(duration time.Duration) <-chan time.Time
+
+	// AfterFunc waits for the duration to elapse and then calls the function f given to it.
+	AfterFunc(d time.Duration, f func()) Timer
 
 	// NewTicker returns a new Ticker.
 	NewTicker(d time.Duration) Ticker
@@ -36,4 +40,20 @@ type Ticker interface {
 
 	// Stop the Ticker.
 	Stop()
+}
+
+type Timer interface {
+	// C returns the channel on which the timer is going to be triggered.
+	C() <-chan time.Time
+
+	// Stop the Timer.
+	Stop() bool
+}
+
+// ContextCtrl is clocked by an external interface.
+type ContextCtrl interface {
+	WithTimeout(
+		parent context.Context,
+		timeout time.Duration,
+	) (context.Context, context.CancelFunc)
 }

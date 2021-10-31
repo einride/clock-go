@@ -18,6 +18,14 @@ type Timer struct {
 // the current time on its channel after at least duration d.
 func (g *Clock) NewTimer(d time.Duration) *Timer {
 	return &Timer{
-		Ticker: g.newTickerInternal("not set", d, false),
+		Ticker: g.newTickerInternal("not set", nil, d, false),
 	}
+}
+
+// Stop prevents the Timer from firing.
+// It returns true if the call stops the timer, false if the timer has already
+// expired or been stopped.
+func (t *Timer) Stop() bool {
+	t.Ticker.Stop()
+	return true
 }

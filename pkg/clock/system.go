@@ -39,10 +39,22 @@ func (c systemClock) Sleep(d time.Duration) {
 	time.Sleep(d)
 }
 
+func (c systemClock) AfterFunc(d time.Duration, f func()) Timer {
+	return &systemTimer{Timer: time.AfterFunc(d, f)}
+}
+
 type systemTicker struct {
 	time.Ticker
 }
 
 func (t systemTicker) C() <-chan time.Time {
 	return t.Ticker.C
+}
+
+type systemTimer struct {
+	*time.Timer
+}
+
+func (t systemTimer) C() <-chan time.Time {
+	return t.Timer.C
 }

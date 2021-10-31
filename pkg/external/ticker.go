@@ -51,10 +51,10 @@ func (g *Clock) NewTicker(d time.Duration) clock.Ticker {
 		calledFrom = fmt.Sprintf("called from %s#%d\n", file, no)
 	}
 	g.Logger.Info("added new ticker", zap.String("called from", calledFrom))
-	return g.newTickerInternal(calledFrom, d, true)
+	return g.newTickerInternal(calledFrom, nil, d, true)
 }
 
-func (g *Clock) newTickerInternal(caller string, d time.Duration, periodic bool) clock.Ticker {
+func (g *Clock) newTickerInternal(caller string, endFunc func(), d time.Duration, periodic bool) clock.Ticker {
 	c := make(chan time.Time)
 	uuid := makeUUID()
 	intervalTicker := &ticker{
@@ -65,6 +65,9 @@ func (g *Clock) newTickerInternal(caller string, d time.Duration, periodic bool)
 			g.tickerMutex.Lock()
 			delete(g.tickers, uuid)
 			g.tickerMutex.Unlock()
+			if endFunc != nil {
+				endFunc()
+			}
 		},
 		isPeriodic: periodic,
 	}
