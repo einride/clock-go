@@ -18,7 +18,7 @@ import (
 type Clock struct {
 	Logger        *zap.Logger
 	timestampChan chan time.Time
-	timeMutex     sync.RWMutex
+	timeMutex     sync.Mutex
 	currentTime   time.Time
 	tickerMutex   sync.RWMutex
 	tickers       map[string]*ticker.Ticker
@@ -46,6 +46,7 @@ func (g *Clock) Run(ctx context.Context) error {
 		case <-ctxDone:
 			return nil
 		case recvTime := <-g.timestampChan:
+			g.timeMutex.Lock()
 			g.tickerMutex.RLock()
 			for _, tickerInstance := range g.tickers {
 				if !tickerInstance.IsDurationReached(recvTime) {
@@ -63,21 +64,21 @@ func (g *Clock) Run(ctx context.Context) error {
 					g.Logger.Warn("ticker dropped message", zap.String("called from", tickerInstance.Caller))
 				}
 			}
-			g.tickerMutex.RUnlock()
 			g.setTime(recvTime)
+			g.timeMutex.Unlock()
+			g.tickerMutex.RUnlock()
 		}
 	}
 }
 
 func (g *Clock) getTime() time.Time {
-	g.timeMutex.RLock()
-	defer g.timeMutex.RUnlock()
+	g.timeMutex.Lock()
+	defer g.timeMutex.Unlock()
 	return g.currentTime
 }
 
 func (g *Clock) setTime(newTime time.Time) {
-	g.timeMutex.Lock()
-	defer g.timeMutex.Unlock()
+	// note: mutex should be locked when arriving here.
 	g.currentTime = newTime
 }
 
