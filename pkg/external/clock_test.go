@@ -24,6 +24,38 @@ func TestExternalClock_NewTicker(t *testing.T) {
 	assert.Assert(t, is.Len(externalClock.tickers, 1))
 }
 
+func TestExternalClock_Now(t *testing.T) {
+	// TestExternalClock_Now verifies that calling Now() method straight after a SetTimestamp(ts)
+	// will return ts as expected.
+
+	// Given
+	externalClock := newTestFixture(t)
+	externalClock.SetTimestamp(time.Unix(0, 0))
+
+	// make sure timestamp is setup before we continue
+	<-time.After(100 * time.Millisecond) // timeout
+	if externalClock.Now() != time.Unix(0, 0) {
+		t.Fatalf("Could not initialize time before timeout.")
+	}
+
+	// Feed the clock with a few different timestamps
+	t0 := time.Unix(10, 0)
+	timeList := []time.Time{t0, t0.Add(time.Minute), t0.Add(2 * time.Minute)}
+
+	for i := 0; i < 10; i++ { // repeat a few times to try to trigger racing
+		for _, ts := range timeList {
+			// Given
+			externalClock.SetTimestamp(time.Unix(0, 1))
+			externalClock.SetTimestamp(ts)
+			// Expect
+			cnow := externalClock.Now()
+			if ts.UnixNano() != cnow.UnixNano() {
+				t.Errorf("Expected: %v, Got: %v", ts.UnixNano(), cnow.UnixNano())
+			}
+		}
+	}
+}
+
 func TestExternalClock_Stop(t *testing.T) {
 	externalClock := newTestFixture(t)
 
