@@ -2,7 +2,6 @@
 package clock
 
 import (
-	"context"
 	"time"
 
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -48,12 +47,4 @@ type Timer interface {
 
 	// Stop the Timer.
 	Stop() bool
-}
-
-// ContextCtrl is clocked by an external interface.
-type ContextCtrl interface {
-	WithTimeout(
-		parent context.Context,
-		timeout time.Duration,
-	) (context.Context, context.CancelFunc)
 }
