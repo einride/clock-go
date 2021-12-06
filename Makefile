@@ -1,3 +1,5 @@
+SHELL := /usr/bin/env bash
+
 # all: run a complete build
 all: \
 	yaml-format \
@@ -14,6 +16,7 @@ include .tools/git-verify-nodiff/rules.mk
 include .tools/golangci-lint/rules.mk
 include .tools/prettier/rules.mk
 include .tools/goreview/rules.mk
+include .tools/semantic-release/rules.mk
 
 .PHONY: go-test
 go-test:
