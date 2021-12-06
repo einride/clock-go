@@ -1,4 +1,4 @@
-package external
+package externalclock
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/einride/clock-go/pkg/clock"
+	"go.einride.tech/clock"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
