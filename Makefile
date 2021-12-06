@@ -10,10 +10,10 @@ all: \
 	go-mod-tidy \
 	git-verify-nodiff
 
-include tools/git-verify-nodiff/rules.mk
-include tools/golangci-lint/rules.mk
-include tools/prettier/rules.mk
-include tools/goreview/rules.mk
+include .tools/git-verify-nodiff/rules.mk
+include .tools/golangci-lint/rules.mk
+include .tools/prettier/rules.mk
+include .tools/goreview/rules.mk
 
 .PHONY: go-test
 go-test:
