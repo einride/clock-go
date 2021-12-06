@@ -14,7 +14,6 @@ include tools/git-verify-nodiff/rules.mk
 include tools/golangci-lint/rules.mk
 include tools/prettier/rules.mk
 include tools/goreview/rules.mk
-include tools/mockgen/rules.mk
 
 .PHONY: go-test
 go-test:
@@ -27,10 +26,10 @@ go-mod-tidy:
 
 # mockgen-generate: generate Go mocks
 .PHONY: mockgen-generate
-mockgen-generate: pkg/mockclock/clock.go
+mockgen-generate: mockclock/clock.go
 
-pkg/mockclock/clock.go: pkg/clock/clock.go
-	$(mockgen) \
+mockclock/clock.go: clock.go
+	go run -mod=mod github.com/golang/mock/mockgen \
 		-destination $@ \
 		-package mockclock \
-		github.com/einride/clock-go/pkg/clock Clock,Ticker
+		go.einride.tech/clock Clock,Ticker

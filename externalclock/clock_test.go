@@ -1,4 +1,4 @@
-package external_test
+package externalclock_test
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/einride/clock-go/pkg/external"
+	"go.einride.tech/clock/externalclock"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 	"gotest.tools/v3/assert"
@@ -280,7 +280,7 @@ func TestExternalClock_TestLooper_AddTicker(t *testing.T) {
 
 type testLooper struct {
 	init         chan struct{}
-	Clock        *external.Clock
+	Clock        *externalclock.Clock
 	LoopInterval time.Duration
 	Target       int64
 	counter      int64
@@ -304,9 +304,9 @@ func (t *testLooper) Run(ctx context.Context) error {
 	}
 }
 
-func newTestFixture(t *testing.T) *external.Clock {
+func newTestFixture(t *testing.T) *externalclock.Clock {
 	t.Helper()
-	c := external.NewClock(zap.NewExample(), time.Unix(0, 0))
+	c := externalclock.NewClock(zap.NewExample(), time.Unix(0, 0))
 	var g errgroup.Group
 	g.Go(func() error {
 		if err := c.Run(context.Background()); err != nil {

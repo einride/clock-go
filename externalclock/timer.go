@@ -1,9 +1,9 @@
-package external
+package externalclock
 
 import (
 	"time"
 
-	"github.com/einride/clock-go/pkg/clock"
+	"go.einride.tech/clock"
 )
 
 // The Timer type represents a single event.

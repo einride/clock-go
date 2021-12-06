@@ -1,2 +1,0 @@
-# Until Go 1.16 and Go 1.15 can agree on what should be in the go.sum, we ignore it
-go.sum

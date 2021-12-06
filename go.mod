@@ -1,4 +1,4 @@
-module github.com/einride/clock-go
+module go.einride.tech/clock
 
 go 1.17
 
