@@ -306,7 +306,7 @@ func (t *testLooper) Run(ctx context.Context) error {
 
 func newTestFixture(t *testing.T) *externalclock.Clock {
 	t.Helper()
-	c := externalclock.NewClock(zap.NewExample(), time.Unix(0, 0))
+	c := externalclock.New(zap.NewExample(), time.Unix(0, 0))
 	var g errgroup.Group
 	g.Go(func() error {
 		if err := c.Run(context.Background()); err != nil {
