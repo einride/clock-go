@@ -4,7 +4,6 @@ SHELL := /usr/bin/env bash
 all: \
 	yaml-format \
 	markdown-format \
-	mockgen-generate \
 	go-mod-tidy \
 	go-test \
 	go-lint \
@@ -26,13 +25,3 @@ go-test:
 .PHONY: go-mod-tidy
 go-mod-tidy:
 	go mod tidy -v
-
-# mockgen-generate: generate Go mocks
-.PHONY: mockgen-generate
-mockgen-generate: mockclock/clock.go
-
-mockclock/clock.go: clock.go
-	go run -mod=mod github.com/golang/mock/mockgen \
-		-destination $@ \
-		-package mockclock \
-		go.einride.tech/clock Clock,Ticker
