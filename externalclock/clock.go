@@ -23,7 +23,7 @@ type Clock struct {
 	tickers       map[string]*ticker
 }
 
-func NewClock(logger *zap.Logger, initialTime time.Time) *Clock {
+func New(logger *zap.Logger, initialTime time.Time) *Clock {
 	c := &Clock{
 		Logger:        logger,
 		timestampChan: make(chan time.Time),
