@@ -1,19 +1,20 @@
-package clock
+package systemclock
 
 import (
 	"time"
 
+	"go.einride.tech/clock"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-// System returns a Clock implementation that delegate to the time package.
-func System() Clock {
+// New returns a clock.Clock implementation that delegates to the time package.
+func New() clock.Clock {
 	return &systemClock{}
 }
 
 type systemClock struct{}
 
-var _ Clock = &systemClock{}
+var _ clock.Clock = &systemClock{}
 
 func (c systemClock) After(d time.Duration) <-chan time.Time {
 	return time.After(d)
@@ -23,7 +24,7 @@ func (c systemClock) NowProto() *timestamppb.Timestamp {
 	return timestamppb.Now()
 }
 
-func (c systemClock) NewTicker(d time.Duration) Ticker {
+func (c systemClock) NewTicker(d time.Duration) clock.Ticker {
 	return &systemTicker{Ticker: *time.NewTicker(d)}
 }
 
@@ -39,7 +40,7 @@ func (c systemClock) Sleep(d time.Duration) {
 	time.Sleep(d)
 }
 
-func (c systemClock) AfterFunc(d time.Duration, f func()) Timer {
+func (c systemClock) AfterFunc(d time.Duration, f func()) clock.Timer {
 	return &systemTimer{Timer: time.AfterFunc(d, f)}
 }
 
