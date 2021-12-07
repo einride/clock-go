@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"go.einride.tech/clock"
-	"go.uber.org/zap"
 )
 
 type ticker struct {
@@ -46,12 +45,12 @@ func (t *ticker) SetLastTimestamp(lastTimestamp time.Time) {
 
 func (g *Clock) NewTicker(d time.Duration) clock.Ticker {
 	_, file, no, ok := runtime.Caller(1)
-	var calledFrom string
+	var caller string
 	if ok {
-		calledFrom = fmt.Sprintf("called from %s#%d\n", file, no)
+		caller = fmt.Sprintf("called from %s#%d\n", file, no)
 	}
-	g.Logger.Info("added new ticker", zap.String("called from", calledFrom))
-	return g.newTickerInternal(calledFrom, nil, d, true)
+	g.Logger.V(1).Info("added new ticker", "caller", caller)
+	return g.newTickerInternal(caller, nil, d, true)
 }
 
 func (g *Clock) newTickerInternal(caller string, endFunc func(), d time.Duration, periodic bool) clock.Ticker {

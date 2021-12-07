@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
+	testr "github.com/go-logr/logr/testing"
 	"go.einride.tech/clock/externalclock"
-	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 	"gotest.tools/v3/assert"
 )
@@ -306,7 +306,7 @@ func (t *testLooper) Run(ctx context.Context) error {
 
 func newTestFixture(t *testing.T) *externalclock.Clock {
 	t.Helper()
-	c := externalclock.New(zap.NewExample(), time.Unix(0, 0))
+	c := externalclock.New(testr.NewTestLogger(t), time.Unix(0, 0))
 	var g errgroup.Group
 	g.Go(func() error {
 		if err := c.Run(context.Background()); err != nil {
