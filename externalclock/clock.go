@@ -9,13 +9,13 @@ import (
 	"sync"
 	"time"
 
+	"github.com/go-logr/logr"
 	"go.einride.tech/clock"
-	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type Clock struct {
-	Logger        *zap.Logger
+	Logger        logr.Logger
 	timestampChan chan time.Time
 	timeMutex     sync.Mutex
 	currentTime   time.Time
@@ -23,7 +23,7 @@ type Clock struct {
 	tickers       map[string]*ticker
 }
 
-func New(logger *zap.Logger, initialTime time.Time) *Clock {
+func New(logger logr.Logger, initialTime time.Time) *Clock {
 	c := &Clock{
 		Logger:        logger,
 		timestampChan: make(chan time.Time),
@@ -43,7 +43,7 @@ func (g *Clock) NumberOfTriggers() int {
 
 func (g *Clock) Run(ctx context.Context) error {
 	ctxDone := ctx.Done()
-	g.Logger.Info("clock started")
+	g.Logger.V(1).Info("clock started")
 	for {
 		select {
 		case <-ctxDone:
@@ -64,7 +64,7 @@ func (g *Clock) Run(ctx context.Context) error {
 				select {
 				case tickerInstance.timeChan <- recvTime:
 				case <-time.After(20 * time.Millisecond):
-					g.Logger.Warn("ticker dropped message", zap.String("called from", tickerInstance.caller))
+					g.Logger.V(1).Info("ticker dropped message", "caller", tickerInstance.caller)
 				}
 			}
 			g.setTime(recvTime)
