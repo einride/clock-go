@@ -14,39 +14,36 @@ clean-mage-tools:
 
 .PHONY: all
 all: $(magefile)
-	@$(magefile) all
+	@$(magefile) All
 
 .PHONY: convco-check
 convco-check: $(magefile)
-ifndef rev
-	$(error missing argument rev="...")
-endif
-	@$(magefile) convcoCheck $(rev)
+	@$(magefile) ConvcoCheck
 
 .PHONY: format-markdown
 format-markdown: $(magefile)
-	@$(magefile) formatMarkdown
+	@$(magefile) FormatMarkdown
 
 .PHONY: format-yaml
 format-yaml: $(magefile)
-	@$(magefile) formatYaml
+	@$(magefile) FormatYaml
 
 .PHONY: git-verify-no-diff
 git-verify-no-diff: $(magefile)
-	@$(magefile) gitVerifyNoDiff
+	@$(magefile) GitVerifyNoDiff
 
 .PHONY: go-mod-tidy
 go-mod-tidy: $(magefile)
-	@$(magefile) goModTidy
+	@$(magefile) GoModTidy
 
 .PHONY: go-test
 go-test: $(magefile)
-	@$(magefile) goTest
+	@$(magefile) GoTest
 
 .PHONY: golangci-lint
 golangci-lint: $(magefile)
-	@$(magefile) golangciLint
+	@$(magefile) GolangciLint
 
 .PHONY: goreview
 goreview: $(magefile)
-	@$(magefile) goreview
+	@$(magefile) Goreview
