@@ -1,27 +1,27 @@
 version: 2
 
 updates:
-  - package-ecosystem: "gomod"
-    directory: "/"
+  - package-ecosystem: gomod
+    directory: /
     schedule:
-      interval: "weekly"
+      interval: weekly
     labels:
-      - "dependencies"
+      - dependencies
     commit-message:
-      prefix: "chore"
-      include: "scope"
+      prefix: chore
+      include: scope
 
-  - package-ecosystem: "github-actions"
-    directory: "/"
+  - package-ecosystem: github-actions
+    directory: /
     schedule:
-      interval: "weekly"
+      interval: weekly
     labels:
-      - "dependencies"
+      - dependencies
     commit-message:
-      prefix: "chore"
-      include: "scope"
+      prefix: chore
+      include: scope
 
-  - package-ecosystem: "gomod"
-    directory: ".mage"
+  - package-ecosystem: gomod
+    directory: .sage
     schedule:
-      interval: "daily"
+      interval: weekly
