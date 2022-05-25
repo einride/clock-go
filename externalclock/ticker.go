@@ -17,6 +17,7 @@ type ticker struct {
 	timeChan      chan time.Time
 	stopFunc      func()
 	isPeriodic    bool
+	getTimeFunc   func() time.Time
 }
 
 func (t *ticker) C() <-chan time.Time {
@@ -25,6 +26,12 @@ func (t *ticker) C() <-chan time.Time {
 
 func (t *ticker) Stop() {
 	t.stopFunc()
+}
+
+func (t *ticker) Reset(duration time.Duration) {
+	now := t.getTimeFunc()
+	t.duration = duration
+	t.SetLastTimestamp(now)
 }
 
 func (t *ticker) IsDurationReached(currentTime time.Time) bool {
@@ -68,7 +75,8 @@ func (g *Clock) newTickerInternal(caller string, endFunc func(), d time.Duration
 				endFunc()
 			}
 		},
-		isPeriodic: periodic,
+		isPeriodic:  periodic,
+		getTimeFunc: g.getTime,
 	}
 	intervalTicker.SetLastTimestamp(g.getTime())
 	g.tickerMutex.Lock()

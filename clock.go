@@ -39,6 +39,9 @@ type Ticker interface {
 
 	// Stop the Ticker.
 	Stop()
+
+	// Reset stops the trigger and next trigger will after the newly given duration has passed.
+	Reset(duration time.Duration)
 }
 
 type Timer interface {
