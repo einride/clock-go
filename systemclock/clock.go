@@ -25,7 +25,7 @@ func (c systemClock) NowProto() *timestamppb.Timestamp {
 }
 
 func (c systemClock) NewTicker(d time.Duration) clock.Ticker {
-	return &systemTicker{Ticker: *time.NewTicker(d)}
+	return &systemTicker{ticker: time.NewTicker(d)}
 }
 
 func (c systemClock) Now() time.Time {
@@ -45,11 +45,19 @@ func (c systemClock) AfterFunc(d time.Duration, f func()) clock.Timer {
 }
 
 type systemTicker struct {
-	time.Ticker
+	ticker *time.Ticker
+}
+
+func (t systemTicker) Stop() {
+	t.ticker.Stop()
+}
+
+func (t systemTicker) Reset(duration time.Duration) {
+	t.ticker.Reset(duration)
 }
 
 func (t systemTicker) C() <-chan time.Time {
-	return t.Ticker.C
+	return t.ticker.C
 }
 
 type systemTimer struct {
