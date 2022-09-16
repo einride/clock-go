@@ -31,7 +31,7 @@ func TestExternalClock_Now(t *testing.T) {
 
 	// Given
 	externalClock := newTestFixture(t)
-	externalClock.SetTimestamp(time.Unix(0, 0))
+	externalClock.SetTimestamp(context.Background(), time.Unix(0, 0))
 
 	// make sure timestamp is setup before we continue
 	<-time.After(100 * time.Millisecond) // timeout
@@ -46,8 +46,8 @@ func TestExternalClock_Now(t *testing.T) {
 	for i := 0; i < 10; i++ { // repeat a few times to try to trigger racing
 		for _, ts := range timeList {
 			// Given
-			externalClock.SetTimestamp(time.Unix(0, 1))
-			externalClock.SetTimestamp(ts)
+			externalClock.SetTimestamp(context.Background(), time.Unix(0, 1))
+			externalClock.SetTimestamp(context.Background(), ts)
 			// Expect
 			cnow := externalClock.Now()
 			if ts.UnixNano() != cnow.UnixNano() {
@@ -68,7 +68,7 @@ func TestExternalClock_Stop(t *testing.T) {
 
 	// should not be able to tick
 	loopTicks := loopTicker.C()
-	externalClock.SetTimestamp(time.Unix(0, tickTime.Nanoseconds()+1))
+	externalClock.SetTimestamp(context.Background(), time.Unix(0, tickTime.Nanoseconds()+1))
 	didSet := false
 	select {
 	case <-time.After(1 * time.Millisecond):
@@ -100,7 +100,7 @@ func TestExternalClock_Tick(t *testing.T) {
 	loopTicks := loopTicker.C()
 
 	// Send a tick
-	externalClock.SetTimestamp(time.Unix(0, tickTime.Nanoseconds()))
+	externalClock.SetTimestamp(context.Background(), time.Unix(0, tickTime.Nanoseconds()))
 
 	// exect didSet to be true
 	didSet := false
@@ -121,7 +121,7 @@ func TestExternalClock_After(t *testing.T) {
 	afterChan := externalClock.After(tickTime)
 
 	// Send a tick
-	externalClock.SetTimestamp(time.Unix(0, tickTime.Nanoseconds()+1))
+	externalClock.SetTimestamp(context.Background(), time.Unix(0, tickTime.Nanoseconds()+1))
 
 	// exect didSet to be true
 	didSet := false
@@ -145,7 +145,7 @@ func TestExternalClock_AfterFunc(t *testing.T) {
 	afterTimer := externalClock.AfterFunc(triggerTime, func() {
 		didSet = true
 	})
-	externalClock.SetTimestamp(time.Unix(0, triggerTime.Nanoseconds()+1))
+	externalClock.SetTimestamp(context.Background(), time.Unix(0, triggerTime.Nanoseconds()+1))
 	select {
 	case <-time.After(2 * time.Millisecond):
 		t.FailNow()
@@ -162,7 +162,7 @@ func TestExternalClock_Removed(t *testing.T) {
 	afterChan := externalClock.After(tickTime)
 
 	// Send a tick
-	externalClock.SetTimestamp(time.Unix(0, tickTime.Nanoseconds()))
+	externalClock.SetTimestamp(context.Background(), time.Unix(0, tickTime.Nanoseconds()))
 
 	// exect didSet to be true
 	select {
@@ -181,7 +181,7 @@ func TestExternalClock_AfterFailToShortTime(t *testing.T) {
 	afterChan := externalClock.After(tickTime)
 
 	// Send a tick
-	externalClock.SetTimestamp(time.Unix(0, 0))
+	externalClock.SetTimestamp(context.Background(), time.Unix(0, 0))
 
 	// exect didSet to be true
 	select {
@@ -199,7 +199,7 @@ func TestExternalClock_NewTimer(t *testing.T) {
 	timer := externalClock.NewTimer(timerTime)
 	timerSignal := timer.C()
 
-	externalClock.SetTimestamp(time.Unix(0, int64(1)*timerTime.Nanoseconds()+1))
+	externalClock.SetTimestamp(context.Background(), time.Unix(0, int64(1)*timerTime.Nanoseconds()+1))
 
 	select {
 	case <-time.After(1 * time.Second):
@@ -217,7 +217,7 @@ func TestExternalClock_NewTicker_Tick_Periodically(t *testing.T) {
 
 	// Send a tick
 	for i := range make([]int64, 1000) {
-		externalClock.SetTimestamp(time.Unix(0, int64(i+1)*tickTime.Nanoseconds()+1))
+		externalClock.SetTimestamp(context.Background(), time.Unix(0, int64(i+1)*tickTime.Nanoseconds()+1))
 
 		// exect didSet to be true
 		didSet := false
@@ -244,7 +244,7 @@ func TestExternalClock_TestLooper(t *testing.T) {
 			if tick == target {
 				cancel()
 			} else {
-				externalClock.SetTimestamp(time.Unix(0, (tick+1)*time.Millisecond.Nanoseconds()))
+				externalClock.SetTimestamp(ctx, time.Unix(0, (tick+1)*time.Millisecond.Nanoseconds()))
 			}
 		},
 	}
@@ -253,7 +253,7 @@ func TestExternalClock_TestLooper(t *testing.T) {
 		return looper.Run(ctx)
 	})
 	<-looper.init
-	externalClock.SetTimestamp(time.Unix(0, 1*time.Millisecond.Nanoseconds()))
+	externalClock.SetTimestamp(ctx, time.Unix(0, 1*time.Millisecond.Nanoseconds()))
 	assert.NilError(t, g.Wait())
 	assert.Equal(t, looper.Target, looper.counter)
 }
@@ -274,8 +274,28 @@ func TestExternalClock_TestLooper_AddTicker(t *testing.T) {
 		return looper.Run(ctx)
 	})
 	<-looper.init
-	externalClock.SetTimestamp(time.Unix(0, 1*time.Millisecond.Nanoseconds()+1))
+	externalClock.SetTimestamp(ctx, time.Unix(0, 1*time.Millisecond.Nanoseconds()+1))
 	assert.NilError(t, g.Wait())
+}
+
+func TestExternalClock_ContextDoneDontBlock(t *testing.T) {
+	c := externalclock.New(testr.NewTestLogger(t), time.Unix(0, 0))
+
+	ctx, cancel := context.WithCancel(context.Background())
+	g, ctx := errgroup.WithContext(ctx)
+	g.Go(func() error {
+		return c.Run(ctx)
+	})
+	g.Go(func() error {
+		<-time.After(500 * time.Millisecond)
+		cancel()
+		return nil
+	})
+	if err := g.Wait(); err != nil {
+		t.Fatal(err)
+	}
+	// shall not block
+	c.SetTimestamp(ctx, time.Unix(0, 0))
 }
 
 type testLooper struct {

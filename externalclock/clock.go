@@ -33,8 +33,14 @@ func New(logger logr.Logger, initialTime time.Time) *Clock {
 	return c
 }
 
-func (g *Clock) SetTimestamp(t time.Time) {
-	g.timestampChan <- t
+func (g *Clock) SetTimestamp(ctx context.Context, t time.Time) {
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case g.timestampChan <- t:
+		}
+	}
 }
 
 func (g *Clock) NumberOfTriggers() int {

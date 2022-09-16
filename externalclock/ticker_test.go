@@ -1,6 +1,7 @@
 package externalclock_test
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -31,7 +32,7 @@ func TestExternalClock_TickerReset(t *testing.T) {
 	// we let the clock go up to 5, giving 1 tick at 3.
 	for i := 0; i < count/2; i++ {
 		externalTime = externalTime.Add(delta)
-		externalClock.SetTimestamp(externalTime)
+		externalClock.SetTimestamp(context.Background(), externalTime)
 		// add sleep to let the channels clear between the calls.
 		time.Sleep(time.Millisecond)
 	}
@@ -40,7 +41,7 @@ func TestExternalClock_TickerReset(t *testing.T) {
 	loopTicker.Reset(tickerDelta)
 	for i := count / 2; i < count; i++ {
 		externalTime = externalTime.Add(delta)
-		externalClock.SetTimestamp(externalTime)
+		externalClock.SetTimestamp(context.Background(), externalTime)
 	}
 	cancel <- struct{}{}
 	assert.DeepEqual(t, receivedTime, []time.Time{time.UnixMilli(3), time.UnixMilli(8)})
