@@ -38,6 +38,8 @@ func (g *Clock) SetTimestamp(t time.Time) {
 }
 
 func (g *Clock) NumberOfTriggers() int {
+	g.tickerMutex.RLock()
+	defer g.tickerMutex.RUnlock()
 	return len(g.tickers)
 }
 
