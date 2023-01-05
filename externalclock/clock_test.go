@@ -46,7 +46,6 @@ func TestExternalClock_Now(t *testing.T) {
 	for i := 0; i < 10; i++ { // repeat a few times to try to trigger racing
 		for _, ts := range timeList {
 			// Given
-			externalClock.SetTimestamp(time.Unix(0, 1))
 			externalClock.SetTimestamp(ts)
 			// Expect
 			cnow := externalClock.Now()
