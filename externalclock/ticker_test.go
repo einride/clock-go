@@ -41,6 +41,7 @@ func TestExternalClock_TickerReset(t *testing.T) {
 	for i := count / 2; i < count; i++ {
 		externalTime = externalTime.Add(delta)
 		externalClock.SetTimestamp(externalTime)
+		time.Sleep(time.Millisecond)
 	}
 	cancel <- struct{}{}
 	assert.DeepEqual(t, receivedTime, []time.Time{time.UnixMilli(3), time.UnixMilli(8)})

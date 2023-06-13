@@ -230,6 +230,24 @@ func TestExternalClock_NewTicker_Tick_Periodically(t *testing.T) {
 	}
 }
 
+func TestExternalClock_SendBeforeRun(t *testing.T) {
+	// test verifies that sending time on an unstarted clock does not deadlock
+	c := externalclock.New(testr.New(t), time.Unix(0, 0))
+	c.SetTimestamp(time.Unix(1, 0))
+}
+
+func TestExternalClock_SendAfterRun(t *testing.T) {
+	// test verifies that sending time on a cancelled clock does not deadlock
+	c := externalclock.New(testr.New(t), time.Unix(0, 0))
+	// start clock with a deadline
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)
+	t.Cleanup(cancel)
+	assert.NilError(t, c.Run(ctx))
+
+	// sending time
+	c.SetTimestamp(time.Unix(1, 0))
+}
+
 func TestExternalClock_TestLooper(t *testing.T) {
 	externalClock := newTestFixture(t)
 	const target = 1000
