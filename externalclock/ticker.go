@@ -61,7 +61,10 @@ func (g *Clock) NewTicker(d time.Duration) clock.Ticker {
 }
 
 func (g *Clock) newTickerInternal(caller string, endFunc func(), d time.Duration, periodic bool) clock.Ticker {
-	c := make(chan time.Time)
+	// Give the channel a 1-element time buffer.
+	// If the client falls behind while reading, we drop ticks
+	// on the floor until the client catches up.
+	c := make(chan time.Time, 1)
 	uuid := makeUUID()
 	intervalTicker := &ticker{
 		caller:   caller,

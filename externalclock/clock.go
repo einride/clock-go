@@ -15,29 +15,49 @@ import (
 )
 
 type Clock struct {
-	Logger           logr.Logger
-	timestampChan    chan time.Time // synchronization SetTimestamp -> Run
-	timestampUpdated chan struct{}  // synchronization Run -> SetTimestamp
-	timeMutex        sync.Mutex
-	currentTime      time.Time
-	tickerMutex      sync.RWMutex
-	tickers          map[string]*ticker
+	Logger      logr.Logger
+	timeMutex   sync.Mutex
+	currentTime time.Time
+	tickerMutex sync.RWMutex
+	tickers     map[string]*ticker
 }
 
 func New(logger logr.Logger, initialTime time.Time) *Clock {
 	c := &Clock{
-		Logger:           logger,
-		timestampChan:    make(chan time.Time),
-		tickers:          map[string]*ticker{},
-		timestampUpdated: make(chan struct{}),
+		Logger:  logger,
+		tickers: map[string]*ticker{},
 	}
 	c.currentTime = initialTime
 	return c
 }
 
 func (g *Clock) SetTimestamp(t time.Time) {
-	g.timestampChan <- t
-	<-g.timestampUpdated // wait for time to be set before returning
+	g.timeMutex.Lock()
+	g.currentTime = t
+	g.timeMutex.Unlock()
+
+	g.signalTickers(t)
+}
+
+func (g *Clock) signalTickers(t time.Time) {
+	g.tickerMutex.RLock()
+	for _, tickerInstance := range g.tickers {
+		if !tickerInstance.IsDurationReached(t) {
+			continue
+		}
+		tickerInstance.SetLastTimestamp(t)
+		if !tickerInstance.isPeriodic {
+			g.tickerMutex.RUnlock()
+			tickerInstance.Stop()
+			g.tickerMutex.RLock()
+		}
+		select {
+		case tickerInstance.timeChan <- t:
+		case <-time.After(20 * time.Millisecond):
+			g.Logger.V(1).Info("ticker dropped message", "caller", tickerInstance.caller)
+		}
+	}
+	g.tickerMutex.RUnlock()
 }
 
 func (g *Clock) NumberOfTriggers() int {
@@ -46,40 +66,11 @@ func (g *Clock) NumberOfTriggers() int {
 	return len(g.tickers)
 }
 
+// Deprecated: Calling Run is not necessary anymore. The method only blocks until
+// context is cancelled.
 func (g *Clock) Run(ctx context.Context) error {
-	ctxDone := ctx.Done()
-	g.Logger.V(1).Info("clock started")
-	for {
-		select {
-		case <-ctxDone:
-			return nil
-		case recvTime := <-g.timestampChan:
-			g.timeMutex.Lock()
-			g.tickerMutex.RLock()
-
-			g.currentTime = recvTime         // ok to set early since reading is locked while in here.
-			g.timestampUpdated <- struct{}{} // notify SetTimestamp.
-
-			for _, tickerInstance := range g.tickers {
-				if !tickerInstance.IsDurationReached(recvTime) {
-					continue
-				}
-				tickerInstance.SetLastTimestamp(recvTime)
-				if !tickerInstance.isPeriodic {
-					g.tickerMutex.RUnlock()
-					tickerInstance.Stop()
-					g.tickerMutex.RLock()
-				}
-				select {
-				case tickerInstance.timeChan <- recvTime:
-				case <-time.After(20 * time.Millisecond):
-					g.Logger.V(1).Info("ticker dropped message", "caller", tickerInstance.caller)
-				}
-			}
-			g.timeMutex.Unlock()
-			g.tickerMutex.RUnlock()
-		}
-	}
+	<-ctx.Done()
+	return nil
 }
 
 func (g *Clock) getTime() time.Time {
