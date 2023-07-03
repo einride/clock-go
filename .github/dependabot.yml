@@ -5,6 +5,9 @@ updates:
     directory: /
     schedule:
       interval: weekly
+      day: "monday"
+      time: "05:08"
+      timezone: "Europe/Stockholm"
     labels:
       - dependencies
     commit-message:
@@ -15,6 +18,9 @@ updates:
     directory: /
     schedule:
       interval: weekly
+      day: "monday"
+      time: "05:08"
+      timezone: "Europe/Stockholm"
     labels:
       - dependencies
     commit-message:
@@ -25,3 +31,6 @@ updates:
     directory: .sage
     schedule:
       interval: weekly
+      day: "monday"
+      time: "05:08"
+      timezone: "Europe/Stockholm"
