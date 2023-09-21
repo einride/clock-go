@@ -1,0 +1,11 @@
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: clock-go
+  description: A clock interface, with swappable implementations
+spec:
+  type: library
+  lifecycle: production
+  owner: team-ads-platform
+  system: clock
