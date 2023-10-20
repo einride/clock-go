@@ -275,6 +275,37 @@ func TestExternalClock_TestLooper(t *testing.T) {
 	assert.Equal(t, looper.Target, looper.counter)
 }
 
+func TestTicker_ResetRace(t *testing.T) {
+	// This test does not have any assertions, and instead is intended to catch
+	// data races with `-race` flag set.
+	const (
+		ticks        = 100
+		tickInterval = time.Millisecond
+	)
+	clock := newTestFixture(t)
+	done := make(chan struct{}, 2)
+	go func() {
+		initialTime := time.Unix(0, 0)
+		for i := 0; i < ticks; i++ {
+			clock.SetTimestamp(initialTime.Add(time.Second))
+			time.Sleep(tickInterval)
+		}
+		done <- struct{}{}
+	}()
+	go func() {
+		ticker := clock.NewTicker(time.Second)
+		for i := 0; i < ticks; i++ {
+			ticker.Reset(time.Second)
+			time.Sleep(tickInterval)
+		}
+		ticker.Stop()
+		done <- struct{}{}
+	}()
+
+	<-done
+	<-done
+}
+
 func TestExternalClock_TestLooper_AddTicker(t *testing.T) {
 	externalClock := newTestFixture(t)
 	ctx, cancel := context.WithCancel(context.Background())

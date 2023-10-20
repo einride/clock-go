@@ -30,12 +30,18 @@ func (t *ticker) Stop() {
 
 func (t *ticker) Reset(duration time.Duration) {
 	now := t.getTimeFunc()
+	t.mutex.Lock()
 	t.duration = duration
-	t.SetLastTimestamp(now)
+	t.lastTimeStamp = now
+	t.mutex.Unlock()
 }
 
 func (t *ticker) IsDurationReached(currentTime time.Time) bool {
-	return t.duration <= currentTime.Sub(t.GetLastTimestamp())
+	t.mutex.Lock()
+	dur := t.duration
+	ts := t.lastTimeStamp
+	t.mutex.Unlock()
+	return dur <= currentTime.Sub(ts)
 }
 
 func (t *ticker) GetLastTimestamp() time.Time {
