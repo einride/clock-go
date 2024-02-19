@@ -313,7 +313,7 @@ func TestExternalClock_TestLooper_AddTicker(t *testing.T) {
 		init:         make(chan struct{}),
 		Clock:        externalClock,
 		LoopInterval: 1 * time.Millisecond,
-		Callback: func(tick int64) {
+		Callback: func(_ int64) {
 			cancel()
 		},
 	}
