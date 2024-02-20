@@ -6,4 +6,4 @@ metadata:
   description: Clock/time related libraries
 spec:
   owner: team-ads-platform
-  domain: internal-developer-platform
+  domain: autonomous-vehicle
