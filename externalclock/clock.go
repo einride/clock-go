@@ -5,26 +5,24 @@ import (
 	"crypto/rand"
 	"fmt"
 	"log"
+	"log/slog"
 	"runtime"
 	"sync"
 	"time"
 
-	"github.com/go-logr/logr"
 	"go.einride.tech/clock"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type Clock struct {
-	Logger      logr.Logger
 	timeMutex   sync.Mutex
 	currentTime time.Time
 	tickerMutex sync.RWMutex
 	tickers     map[string]*ticker
 }
 
-func New(logger logr.Logger, initialTime time.Time) *Clock {
+func New(initialTime time.Time) *Clock {
 	c := &Clock{
-		Logger:  logger,
 		tickers: map[string]*ticker{},
 	}
 	c.currentTime = initialTime
@@ -54,7 +52,7 @@ func (g *Clock) signalTickers(t time.Time) {
 		select {
 		case tickerInstance.timeChan <- t:
 		case <-time.After(20 * time.Millisecond):
-			g.Logger.V(1).Info("ticker dropped message", "caller", tickerInstance.caller)
+			slog.Debug("ticker dropped message", slog.String("caller", tickerInstance.caller))
 		}
 	}
 	g.tickerMutex.RUnlock()

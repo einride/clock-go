@@ -6,7 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-logr/logr/testr"
 	"go.einride.tech/clock/externalclock"
 	"golang.org/x/sync/errgroup"
 	"gotest.tools/v3/assert"
@@ -232,13 +231,14 @@ func TestExternalClock_NewTicker_Tick_Periodically(t *testing.T) {
 
 func TestExternalClock_SendBeforeRun(t *testing.T) {
 	// test verifies that sending time on an unstarted clock does not deadlock
-	c := externalclock.New(testr.New(t), time.Unix(0, 0))
+	_ = t
+	c := externalclock.New(time.Unix(0, 0))
 	c.SetTimestamp(time.Unix(1, 0))
 }
 
 func TestExternalClock_SendAfterRun(t *testing.T) {
 	// test verifies that sending time on a cancelled clock does not deadlock
-	c := externalclock.New(testr.New(t), time.Unix(0, 0))
+	c := externalclock.New(time.Unix(0, 0))
 	// start clock with a deadline
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)
 	t.Cleanup(cancel)
@@ -354,7 +354,7 @@ func (t *testLooper) Run(ctx context.Context) error {
 
 func newTestFixture(t *testing.T) *externalclock.Clock {
 	t.Helper()
-	c := externalclock.New(testr.New(t), time.Unix(0, 0))
+	c := externalclock.New(time.Unix(0, 0))
 	var g errgroup.Group
 	g.Go(func() error {
 		if err := c.Run(context.Background()); err != nil {
