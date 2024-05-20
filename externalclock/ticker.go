@@ -2,6 +2,7 @@ package externalclock
 
 import (
 	"fmt"
+	"log/slog"
 	"runtime"
 	"sync"
 	"time"
@@ -62,7 +63,7 @@ func (g *Clock) NewTicker(d time.Duration) clock.Ticker {
 	if ok {
 		caller = fmt.Sprintf("called from %s#%d\n", file, no)
 	}
-	g.Logger.V(1).Info("added new ticker", "caller", caller)
+	slog.Debug("added new ticker", slog.String("caller", caller))
 	return g.newTickerInternal(caller, nil, d, true)
 }
 
