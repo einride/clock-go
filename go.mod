@@ -1,10 +1,12 @@
 module go.einride.tech/clock
 
-go 1.17
+go 1.21
+
+toolchain go1.23.2
 
 require (
 	golang.org/x/sync v0.8.0
-	google.golang.org/protobuf v1.34.2
+	google.golang.org/protobuf v1.35.1
 	gotest.tools/v3 v3.5.1
 )
 
