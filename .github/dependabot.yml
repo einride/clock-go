@@ -21,6 +21,11 @@ updates:
           - "minor"
           - "patch"
 
+    cooldown:
+      default-days: 7
+      semver-major-days: 30
+      semver-minor-days: 7
+      semver-patch-days: 3
   - package-ecosystem: github-actions
     directory: /
     schedule:
@@ -34,6 +39,11 @@ updates:
       prefix: chore
       include: scope
 
+    cooldown:
+      default-days: 7
+      semver-major-days: 30
+      semver-minor-days: 7
+      semver-patch-days: 3
   - package-ecosystem: gomod
     directory: .sage
     schedule:
@@ -41,3 +51,8 @@ updates:
       day: "monday"
       time: "05:08"
       timezone: "Europe/Stockholm"
+    cooldown:
+      default-days: 7
+      semver-major-days: 30
+      semver-minor-days: 7
+      semver-patch-days: 3
